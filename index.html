@@ -312,7 +312,7 @@ table tr {
 /* ======================================================= */
 /* ===== PERBAIKAN CETAK V4 (METODE NORMAL FLOW)       ===== */
 /* ======================================================= */
-   /* ======== PERBAIKAN CETAK PDF (RAPI DAN PROPORSIONAL) ======== */
+/* ======== PERBAIKAN CETAK PDF (RAPI DAN PROPORSIONAL) ======== */
 @media print {
   /* Ukuran halaman A4 */
   @page {
@@ -377,67 +377,7 @@ table tr {
     display: none !important;
   }
 }
-/* ===== PERBAIKAN KHUSUS RAPORT MUATAN LOKAL ===== */
-@media print {
-  /* Hilangkan jeda halaman di awal raport Muatan Lokal */
-  .raport-container.mulok,
-  .raport-container[data-type="mulok"] {
-    page-break-before: auto !important;
-    page-break-inside: avoid !important;
-  }
 
-  /* Pastikan header & identitas siswa ikut di satu halaman dengan tabel */
-  .raport-container.mulok .raport-header,
-  .raport-container.mulok .raport-table-identity,
-  .raport-container[data-type="mulok"] .raport-header,
-  .raport-container[data-type="mulok"] .raport-table-identity {
-    page-break-after: auto !important;
-    page-break-before: auto !important;
-    page-break-inside: avoid !important;
-    margin-bottom: 6mm !important;
-  }
-
-  /* Jika ada elemen .page-break di awal raport muatan lokal, sembunyikan */
-  .raport-container.mulok .page-break:first-child,
-  .raport-container[data-type="mulok"] .page-break:first-child {
-    display: none !important;
-  }
-
-  /* Pastikan tabel pertama tidak terpisah */
-  .raport-container.mulok table:first-of-type,
-  .raport-container[data-type="mulok"] table:first-of-type {
-    page-break-before: auto !important;
-    break-before: auto !important;
-  }
-}
-  <style>
-/* 🔧 PERBAIKAN FINAL: Raport Muatan Lokal agar header & identitas tidak terpisah */
-@media print {
-  /* Targetkan raport muatan lokal berdasarkan kata kunci di judul */
-  .raport-container:has(h2:contains("MUATAN LOKAL")),
-  .raport-container:has(h3:contains("MUATAN LOKAL")),
-  .raport-container:has(h4:contains("MUATAN LOKAL")) {
-    page-break-before: auto !important;
-    page-break-inside: avoid !important;
-  }
-
-  /* Pastikan logo, nama sekolah, dan identitas siswa ikut di halaman yang sama */
-  .raport-container:has(h2:contains("MUATAN LOKAL")) .raport-header,
-  .raport-container:has(h2:contains("MUATAN LOKAL")) .raport-table-identity,
-  .raport-container:has(h2:contains("MUATAN LOKAL")) .elemen-raport-block:first-of-type {
-    page-break-before: auto !important;
-    page-break-after: auto !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    margin-bottom: 8mm !important;
-  }
-
-  /* Jika ada pemisah halaman sebelum tabel pertama, sembunyikan */
-  .raport-container:has(h2:contains("MUATAN LOKAL")) .page-break:first-of-type {
-    display: none !important;
-  }
-}
-</style>
 
   </style>
 </head>
@@ -2099,75 +2039,17 @@ table tr {
     }
 
     // --- CETAK/PDF FUNCTIONS ---
+
     function prepareCetak(jenis) {
-    const nisn = document.getElementById('pilihSiswaCetak').value;
-    if (!nisn) {
-        showToast('Pilih siswa terlebih dahulu.');
-        return;
-    }
+        const nisn = document.getElementById('pilihSiswaCetak').value;
+        if (!nisn) {
+            showToast('Pilih siswa terlebih dahulu.');
+            return;
+        }
 
-    const siswa = findSiswa(nisn);
-    const peng = pengaturan;
-    let htmlContent = "";
-    let namaFile = "";
-
-    // =========================
-    // RAPORT INTRAKURIKULER
-    // =========================
-    if (jenis === "intra") {
-        const sum = atpData[nisn]?.intraSummary || {};
-        const deskAgama = sum.agama || "Deskripsi belum diisi/dibuat.";
-        const deskJati = sum.jatidiri || "Deskripsi belum diisi/dibuat.";
-        const deskLiterasi = sum.literasi || "Deskripsi belum diisi/dibuat.";
-
-        htmlContent = `
-        <div class="raport-container">
-            <div class="raport-header">
-            <h3>RAPORT INTRAKURIKULER</h3>
-            <h4>${peng.namaSekolah || ""}</h4>
-            <p><strong>Nama:</strong> ${siswa?.nama || ""}</p>
-            <p><strong>Kelas:</strong> ${siswa?.kelas || ""}</p>
-            </div>
-
-            <div class="elemen-raport-block">
-            <h4>Nilai Agama dan Budi Pekerti</h4>
-            <div class="elemen-content-block">${deskAgama}</div>
-            </div>
-
-            <div class="elemen-raport-block">
-            <h4>Jati Diri</h4>
-            <div class="elemen-content-block">${deskJati}</div>
-            </div>
-
-            <div class="elemen-raport-block">
-            <h4>Literasi, Matematika, Sains, Teknologi, Rekayasa & Seni</h4>
-            <div class="elemen-content-block">${deskLiterasi}</div>
-            </div>
-        </div>
-        `;
-        namaFile = `${siswa?.nama || "Raport"}_Intra.pdf`;
-    }
-
-  // === Masukkan isi raport ke area preview ===
-  document.getElementById("previewCetak").innerHTML = htmlContent;
-
-  // === Lanjutkan ke proses cetak PDF ===
-  const pdf = new jspdf.jsPDF({
-    orientation: "p",
-    unit: "mm",
-    format: "a4",
-  });
-
-  pdf.html(document.getElementById("previewCetak"), {
-    margin: [15, 15, 15, 15],
-    html2canvas: { scale: 0.7 },
-    callback: function (pdf) {
-      pdf.save(`${namaFile}`);
-    },
-  });
-}
-
-
+        function prepareCetak(jenis) {
+        const element = document.getElementById('previewCetak');
+        if (!element) return;
 
         // Atur ukuran dan margin PDF agar proporsional
         const opt = {
@@ -2189,7 +2071,22 @@ table tr {
             </div>
         `;
     }
+        const pdf = new jspdf.jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+        });
 
+        pdf.html(elementToPrint, {
+        margin: [15, 15, 15, 15], // atas, kanan, bawah, kiri
+        autoPaging: 'text',
+        html2canvas: { scale: 0.7 },
+        callback: function (pdf) {
+            pdf.save(`${namaFile}.pdf`);
+        }
+        });
+
+        
     function downloadRaportAsPDF(nisn, jenis) {
         const raportContent = document.getElementById('raportContent');
         if (!raportContent) {
